@@ -1,18 +1,18 @@
 #include <QVector>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 #include "logic.h"
 
-LogicDestroyer Logic::m_destroyer;
 Logic *Logic::pInst = nullptr;
 
 Logic::Logic(QObject *parent) : QObject(parent) {
-
   for (unsigned short i = 1; i < 16; ++i) {
     m_list << QString::number(i);
   }
   m_list << QString::number(0);
   connect(this, &Logic::listChanged, this, &Logic::movement);
-  //refresh();
 }
 
 int Logic::moveCounter() const {
@@ -59,10 +59,6 @@ void Logic::move(int currentIndex) {
            && m_list[currentIndex - 4] == "0") {
     m_list.move(currentIndex, currentIndex - 4);
     m_list.move(currentIndex - 3, currentIndex); listChanged(m_list);
-  }
-
-  if (checkWin()) {
-    emit Victory();
   }
 }
 
@@ -115,15 +111,47 @@ bool Logic::checkBorder(int value, bool right) {
   return true;
 }
 
+void Logic::loadScores() {
+  QFile loadFile(QStringLiteral("scores.json"));
+
+  if (!loadFile.open(QIODevice::ReadOnly)) {
+    qWarning("can't load file");
+    setBestScore(0);
+    return;
+  }
+  QByteArray date = loadFile.readLine(20);
+  QJsonDocument document(QJsonDocument::fromJson(date));
+  auto json = document.object();
+  setBestScore(json["score"].toInt());
+}
+
+void Logic::saveScores() {
+  QFile saveFile(QStringLiteral("scores.json"));
+
+  if (!saveFile.open(QIODevice::WriteOnly)) {
+    qWarning("Could't open file to saving data!");
+    return;
+  }
+
+  setBestScore(m_moveCounter);
+  QJsonObject dataToSave { QPair<QString, QJsonValue>("scores", m_BestScore) };
+  QJsonDocument document(dataToSave);
+  saveFile.write(document.toJson());
+}
+
+
 QObject *Logic::singletone_provider(QQmlEngine *engine, QJSEngine *scriptEngine) {
   Q_UNUSED(engine)
   Q_UNUSED(scriptEngine)
 
   if (!pInst) {
     pInst = new Logic();
-    m_destroyer.setInstance(pInst);
   }
   return pInst;
+}
+
+int Logic::BestScore() const {
+  return m_BestScore;
 }
 
 QStringList Logic::list() const {
@@ -145,6 +173,15 @@ void Logic::setList(QStringList list) {
 
   m_list = list;
   emit listChanged(list);
+}
+
+void Logic::setBestScore(int BestScore) {
+  if (m_BestScore == BestScore || m_BestScore < BestScore && m_BestScore != 0) {
+    return;
+  }
+
+  m_BestScore = BestScore;
+  emit BestScoreChanged(BestScore);
 }
 
 void Logic::movement() {

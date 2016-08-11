@@ -7,30 +7,19 @@ class QQmlEngine;
 class QJSEngine;
 class QStandardItemModel;
 
-class Logic;
-
-class LogicDestroyer {
-public:
-  LogicDestroyer() :pLogic(nullptr) {}
-  ~LogicDestroyer() { delete pLogic; }
-  void setInstance(Logic *pointer) { pLogic = pointer; }
-
-private:
-  Logic *pLogic;
-};
-
 class Logic : public QObject {
   Q_OBJECT
 
   Q_PROPERTY(QStringList list READ list WRITE setList NOTIFY listChanged)
   Q_PROPERTY(int moveCounter READ moveCounter WRITE setmoveCounter NOTIFY moveCounterChanged)
+  Q_PROPERTY(int BestScore READ BestScore WRITE setBestScore NOTIFY BestScoreChanged)
 
   explicit Logic(QObject *parent = nullptr);
-  Logic(const Logic &) = default;
-  Logic(Logic &&) = default;
-  ~Logic() = default;
 
 public:
+  Logic(const Logic &) = delete;
+  Logic(Logic &&) = delete;
+  ~Logic() = default;
   int moveCounter() const;
 
   Q_INVOKABLE void refresh();
@@ -40,20 +29,27 @@ public:
 
   QStringList list() const;
   int countInvertion() const;
+  int BestScore() const;
 
   bool checkOutOfRange(int value);
   bool checkBorder(int value, bool right);
 
+  void loadScores();
+  Q_INVOKABLE void saveScores();
+
   static QObject *singletone_provider(QQmlEngine *engine, QJSEngine *scriptEngine);
+
 
 signals:
   void moveCounterChanged(int moveCounter);
   void listChanged(QStringList list);
-  void Victory();
+  void BestScoreChanged(int BestScore);
 
 public slots:
   void setmoveCounter(int moveCounter);
   void setList(QStringList list);
+  void setBestScore(int BestScore);
+
 
 private slots:
   void movement();
@@ -61,9 +57,9 @@ private slots:
 private:
   QStringList m_list;
   int m_moveCounter {0};
-
-  static LogicDestroyer m_destroyer;
   static Logic *pInst;
+  int m_BestScore;
+
 };
 
 

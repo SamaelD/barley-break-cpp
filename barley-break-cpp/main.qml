@@ -22,10 +22,9 @@ ApplicationWindow {
         signal victory();
 
         function refreshModel() {
-            Logic.refresh();
-            var res = JSON.parse(wnd.score);
-            newGame.text = "Best result: " + res;
-            newGame.visible = true;
+            //Logic.refresh();  // commented for testing save/load JSON
+            newGame.text = "Best result: " + Logic.BestScore;
+            newGame.visible = Logic.BestScore == 0 ? false : true;
         }
 
         header: Button {
@@ -121,10 +120,7 @@ ApplicationWindow {
                     }
                     Logic.move(index);
                     if (Logic.checkWin()) {
-                        var res = JSON.stringify(Logic.moveCounter);
-                        if (wnd.score > res || wnd.score == 0) {
-                            wnd.score = res;
-                        }
+                        Logic.saveScores();
                         gameOverDialog.visible = true;
                     }
                 }
@@ -152,4 +148,5 @@ ApplicationWindow {
 
         title: "New game"
     }
+    Component.onCompleted: grid.refreshModel();
 }
