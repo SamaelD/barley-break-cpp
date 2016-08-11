@@ -7,11 +7,11 @@
 Logic::Logic(QObject *parent) : QObject(parent) {
 
   srand(time(0));
-  for (unsigned short i = 1; i < 16; ++i) {
+  for (unsigned short i = 0; i < 16; ++i) {
     m_list << QString::number(i);
   }
-  m_list << QString::number(0);
-  //refresh();
+  connect(this, &Logic::listChanged, this, &Logic::movement);
+  refresh();
 }
 
 int Logic::moveCounter() const {
@@ -33,12 +33,32 @@ void Logic::refresh() {
   if (countInvertion() % 2 != 0) {
     m_list.move(size - 2, size - 1);
   }
+
   emit listChanged(m_list);
+  setmoveCounter(0);
 }
 
 void Logic::move(int currentIndex) {
-  checkWin();
-  Q_UNUSED(currentIndex)
+  if (checkOutOfRange(currentIndex + 1)
+      && checkBorder(currentIndex, true)
+      && m_list[currentIndex + 1] == "0") {
+    m_list.move(currentIndex, currentIndex + 1); listChanged(m_list);
+  }
+  else if (checkOutOfRange(currentIndex - 1)
+           && checkBorder(currentIndex, false)
+           && m_list[currentIndex - 1] == "0") {
+    m_list.move(currentIndex, currentIndex - 1); listChanged(m_list);
+  }
+  else if (checkOutOfRange(currentIndex + 4)
+           && m_list[currentIndex + 4] == "0") {
+    m_list.move(currentIndex, currentIndex + 4);
+    m_list.move(currentIndex + 3, currentIndex); listChanged(m_list);
+  }
+  else if (checkOutOfRange(currentIndex - 4)
+           && m_list[currentIndex - 4] == "0") {
+    m_list.move(currentIndex, currentIndex - 4);
+    m_list.move(currentIndex - 3, currentIndex); listChanged(m_list);
+  }
 }
 
 bool Logic::checkWin() const {
@@ -73,13 +93,20 @@ int Logic::countInvertion() const {
 }
 
 bool Logic::checkOutOfRange(int value) {
-  Q_UNUSED(value)
-  return false;
+
+  if (value < 0 || value >= m_list.size()) {
+    return false;
+  }
+  return true;
 }
 
 bool Logic::checkBorder(int value, bool right) {
-  Q_UNUSED(value)
-  Q_UNUSED(right)
+  auto size = m_list.size();
+  for (int i = (right ? 3 : 0); i < size; i += 4) {
+    if (value == i) {
+      return false;
+    }
+  }
   return true;
 }
 
@@ -90,8 +117,7 @@ QObject *Logic::singletone_provider(QQmlEngine *engine, QJSEngine *scriptEngine)
   return new Logic();
 }
 
-QStringList Logic::list() const
-{
+QStringList Logic::list() const {
   return m_list;
 }
 
@@ -104,11 +130,14 @@ void Logic::setmoveCounter(int moveCounter) {
   emit moveCounterChanged(moveCounter);
 }
 
-void Logic::setList(QStringList list)
-{
+void Logic::setList(QStringList list) {
   if (m_list == list)
     return;
 
   m_list = list;
   emit listChanged(list);
+}
+
+void Logic::movement() {
+  setmoveCounter(m_moveCounter + 1);
 }

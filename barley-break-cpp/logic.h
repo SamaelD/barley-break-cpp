@@ -37,6 +37,9 @@ public slots:
   void setmoveCounter(int moveCounter);
   void setList(QStringList list);
 
+private slots:
+  void movement();
+
 private:
   QStringList m_list;
   int m_moveCounter {0};

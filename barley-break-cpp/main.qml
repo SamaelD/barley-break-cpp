@@ -114,12 +114,12 @@ ApplicationWindow {
                     }
                 }
             }
-            ScaleAnimator on scale {
-                id: anim;
-                from: 0;
-                to: 1;
-                duration: 400;
-            }
+            //ScaleAnimator on scale {
+            //    id: anim;
+            //    from: 0;
+            //    to: 1;
+            //    duration: 400;
+            //}
         }
     }
 
