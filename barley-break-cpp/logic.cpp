@@ -176,7 +176,7 @@ void Logic::setList(QStringList list) {
 }
 
 void Logic::setBestScore(int BestScore) {
-  if (m_BestScore == BestScore || m_BestScore < BestScore && m_BestScore != 0) {
+  if (m_BestScore == BestScore || (m_BestScore < BestScore && m_BestScore != 0)) {
     return;
   }
 
