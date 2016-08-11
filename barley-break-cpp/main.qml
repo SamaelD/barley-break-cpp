@@ -8,7 +8,7 @@ import Logic_CPP 1.0
 ApplicationWindow {
     id: wnd
 
-    property var score: null
+    property var score: 0
 
     minimumHeight: 600
     minimumWidth: 400
@@ -121,7 +121,10 @@ ApplicationWindow {
                     }
                     Logic.move(index);
                     if (Logic.checkWin()) {
-                        wnd.score = JSON.stringify(Logic.moveCounter);
+                        var res = JSON.stringify(Logic.moveCounter);
+                        if (wnd.score > res || wnd.score == 0) {
+                            wnd.score = res;
+                        }
                         gameOverDialog.visible = true;
                     }
                 }
