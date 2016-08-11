@@ -19,7 +19,7 @@ public:
   Q_INVOKABLE void refresh();
   Q_INVOKABLE void move(int currentIndex);
   Q_INVOKABLE bool checkWin() const;
-  Q_INVOKABLE QString identifier(int index);
+  Q_INVOKABLE QString identifier(int index) const;
 
   QStringList list() const;
   int countInvertion() const;

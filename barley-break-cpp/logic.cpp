@@ -7,10 +7,11 @@
 Logic::Logic(QObject *parent) : QObject(parent) {
 
   srand(time(0));
-  for (unsigned short i = 0; i < 16; ++i) {
+  for (unsigned short i = 1; i < 16; ++i) {
     m_list << QString::number(i);
   }
-  refresh();
+  m_list << QString::number(0);
+  //refresh();
 }
 
 int Logic::moveCounter() const {
@@ -26,7 +27,7 @@ void Logic::refresh() {
                             return QString::number(value);
                           };
 
-  for(unsigned short i = 0; i < size; ++i) {
+  for (unsigned short i = 0; i < size; ++i) {
     m_list[i] = getIdentifier();
   }
   if (countInvertion() % 2 != 0) {
@@ -36,14 +37,22 @@ void Logic::refresh() {
 }
 
 void Logic::move(int currentIndex) {
+  checkWin();
   Q_UNUSED(currentIndex)
 }
 
 bool Logic::checkWin() const {
-  return false;
+  auto size = m_list.size();
+  int i = 1;
+  for (auto it : m_list) {
+    if (i < size && it != QString::number(i++)) {
+      return false;
+    }
+  }
+  return true;
 }
 
-QString Logic::identifier(int index) {
+QString Logic::identifier(int index) const {
   return m_list[index];
 }
 
