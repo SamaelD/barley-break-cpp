@@ -1,17 +1,18 @@
+#include <QVector>
+
 #include "logic.h"
-#include <QDebug>
-#include <QMessageBox>
-#include <QThread>
-#include <QTimer>
+
+LogicDestroyer Logic::m_destroyer;
+Logic *Logic::pInst = nullptr;
 
 Logic::Logic(QObject *parent) : QObject(parent) {
 
-  srand(time(0));
-  for (unsigned short i = 0; i < 16; ++i) {
+  for (unsigned short i = 1; i < 16; ++i) {
     m_list << QString::number(i);
   }
+  m_list << QString::number(0);
   connect(this, &Logic::listChanged, this, &Logic::movement);
-  refresh();
+  //refresh();
 }
 
 int Logic::moveCounter() const {
@@ -22,10 +23,10 @@ void Logic::refresh() {
   auto size = m_list.size();
   QVector<int> arr = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
   auto getIdentifier = [&arr]() {
-                            int value = arr[std::rand() % arr.size()];
-                            arr.removeOne(value);
-                            return QString::number(value);
-                          };
+    int value = arr[qrand() % arr.size()];
+    arr.removeOne(value);
+    return QString::number(value);
+  };
 
   for (unsigned short i = 0; i < size; ++i) {
     m_list[i] = getIdentifier();
@@ -59,6 +60,10 @@ void Logic::move(int currentIndex) {
     m_list.move(currentIndex, currentIndex - 4);
     m_list.move(currentIndex - 3, currentIndex); listChanged(m_list);
   }
+
+  if (checkWin()) {
+    emit Victory();
+  }
 }
 
 bool Logic::checkWin() const {
@@ -86,7 +91,7 @@ int Logic::countInvertion() const {
       ++counter;
     }
     if (m_list[j] == "0") {
-      row = static_cast<int>(j / 4);
+      row = j / 4;
     }
   }
   return counter + row;
@@ -114,7 +119,11 @@ QObject *Logic::singletone_provider(QQmlEngine *engine, QJSEngine *scriptEngine)
   Q_UNUSED(engine)
   Q_UNUSED(scriptEngine)
 
-  return new Logic();
+  if (!pInst) {
+    pInst = new Logic();
+    m_destroyer.setInstance(pInst);
+  }
+  return pInst;
 }
 
 QStringList Logic::list() const {

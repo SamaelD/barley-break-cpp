@@ -2,18 +2,35 @@
 #define LOGIC_H
 
 #include <QObject>
-#include <QQmlEngine>
-#include <QJSEngine>
-#include <QStandardItemModel>
+
+class QQmlEngine;
+class QJSEngine;
+class QStandardItemModel;
+
+class Logic;
+
+class LogicDestroyer {
+public:
+  LogicDestroyer() :pLogic(nullptr) {}
+  ~LogicDestroyer() { delete pLogic; }
+  void setInstance(Logic *pointer) { pLogic = pointer; }
+
+private:
+  Logic *pLogic;
+};
 
 class Logic : public QObject {
   Q_OBJECT
 
   Q_PROPERTY(QStringList list READ list WRITE setList NOTIFY listChanged)
   Q_PROPERTY(int moveCounter READ moveCounter WRITE setmoveCounter NOTIFY moveCounterChanged)
-public:
-  explicit Logic(QObject *parent = nullptr);
 
+  explicit Logic(QObject *parent = nullptr);
+  Logic(const Logic &) = default;
+  Logic(Logic &&) = default;
+  ~Logic() = default;
+
+public:
   int moveCounter() const;
 
   Q_INVOKABLE void refresh();
@@ -32,6 +49,7 @@ public:
 signals:
   void moveCounterChanged(int moveCounter);
   void listChanged(QStringList list);
+  void Victory();
 
 public slots:
   void setmoveCounter(int moveCounter);
@@ -44,6 +62,9 @@ private:
   QStringList m_list;
   int m_moveCounter {0};
 
+  static LogicDestroyer m_destroyer;
+  static Logic *pInst;
 };
+
 
 #endif // LOGIC_H

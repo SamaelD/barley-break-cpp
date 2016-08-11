@@ -8,6 +8,8 @@ import Logic_CPP 1.0
 ApplicationWindow {
     id: wnd
 
+    property var score: null
+
     minimumHeight: 600
     minimumWidth: 400
     visible: true
@@ -17,6 +19,15 @@ ApplicationWindow {
     GridView {
         id: grid
 
+        signal victory();
+
+        function refreshModel() {
+            Logic.refresh();
+            var res = JSON.parse(wnd.score);
+            newGame.text = "Best result: " + res;
+            newGame.visible = true;
+        }
+
         header: Button {
             id: refresh
 
@@ -24,7 +35,7 @@ ApplicationWindow {
             height: wnd.height * 0.1
 
             text: "refresh"
-            onClicked: { Logic.refresh(); }
+            onClicked: grid.refreshModel();
         }
 
         footer: Rectangle {
@@ -52,7 +63,7 @@ ApplicationWindow {
         interactive: false;
 
         cellWidth: width / 4
-        cellHeight: ( parent.height - parent.height * 0.2 ) / 4
+        cellHeight: (parent.height - parent.height * 0.2) / 4
 
         model: Logic.list
         delegate: component
@@ -65,8 +76,6 @@ ApplicationWindow {
             }
         }
     }
-
-    //ListModel { id: model }
 
     Component {
         id: component
@@ -107,19 +116,16 @@ ApplicationWindow {
                 hoverEnabled: true
                 acceptedButtons: Qt.LeftButton
                 onClicked: {
-                    if (Logic.identifier(index) == 0) return;
-                    Logic.move(index)
+                    if (Logic.identifier(index) == 0) {
+                        return;
+                    }
+                    Logic.move(index);
                     if (Logic.checkWin()) {
+                        wnd.score = JSON.stringify(Logic.moveCounter);
                         gameOverDialog.visible = true;
                     }
                 }
             }
-            //ScaleAnimator on scale {
-            //    id: anim;
-            //    from: 0;
-            //    to: 1;
-            //    duration: 400;
-            //}
         }
     }
 
@@ -132,9 +138,15 @@ ApplicationWindow {
         text: "You're win the game!\nCongratulations!!\nRestart?"
 
         standardButtons: StandardButton.Yes | StandardButton.No
-        onYes: Logic.refresh()
+        onYes: grid.refreshModel();
         onNo: Qt.quit()
     }
 
-    //Component.onCompleted: Logic.initModel(model);
+    MessageDialog {
+        id: newGame
+
+        visible: false
+
+        title: "New game"
+    }
 }
