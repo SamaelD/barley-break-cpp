@@ -134,7 +134,7 @@ void Logic::loadScores() {
   QByteArray data = loadFile.readAll();
   QJsonDocument document(QJsonDocument::fromJson(data));
   auto json = document.object();
-  setBestScore(json["score"].toInt());
+  setBestScore(json["scores"].toInt());
 }
 
 void Logic::saveScores() {
