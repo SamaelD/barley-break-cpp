@@ -3,17 +3,23 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include <QDebug>
+
 #include "logic.h"
 
 Logic *Logic::pInst = nullptr;
 
 Logic::Logic(QObject *parent) : QObject(parent) {
+  loadScores();
+
   for (unsigned short i = 1; i < 16; ++i) {
     m_list << QString::number(i);
   }
   m_list << QString::number(0);
   connect(this, &Logic::listChanged, this, &Logic::movement);
 }
+
+Logic::~Logic() {}
 
 int Logic::moveCounter() const {
   return m_moveCounter;
@@ -37,6 +43,7 @@ void Logic::refresh() {
 
   emit listChanged(m_list);
   setmoveCounter(0);
+  emit victoryChanged(m_victory = false);
 }
 
 void Logic::move(int currentIndex) {
@@ -59,6 +66,11 @@ void Logic::move(int currentIndex) {
            && m_list[currentIndex - 4] == "0") {
     m_list.move(currentIndex, currentIndex - 4);
     m_list.move(currentIndex - 3, currentIndex); listChanged(m_list);
+  }
+
+  if (checkWin()) {
+    this->saveScores();
+    emit victoryChanged(m_victory = true);
   }
 }
 
@@ -119,8 +131,8 @@ void Logic::loadScores() {
     setBestScore(0);
     return;
   }
-  QByteArray date = loadFile.readLine(20);
-  QJsonDocument document(QJsonDocument::fromJson(date));
+  QByteArray data = loadFile.readAll();
+  QJsonDocument document(QJsonDocument::fromJson(data));
   auto json = document.object();
   setBestScore(json["score"].toInt());
 }
@@ -148,6 +160,10 @@ QObject *Logic::singletone_provider(QQmlEngine *engine, QJSEngine *scriptEngine)
     pInst = new Logic();
   }
   return pInst;
+}
+
+bool Logic::victory() const {
+  return m_victory;
 }
 
 int Logic::BestScore() const {

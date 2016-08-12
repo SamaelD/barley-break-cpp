@@ -66,8 +66,6 @@ ApplicationWindow {
         delegate: Delegate {
             width: grid.cellWidth
             height: grid.cellHeight
-
-            onVictory: gameOverDialog.visible = true;
         }
 
         move: Transition {
@@ -82,7 +80,7 @@ ApplicationWindow {
     MessageDialog {
         id: gameOverDialog
 
-        visible: false
+        visible: Logic.victory;
 
         title: "Winner"
         text: "You're win the game!\nCongratulations!!\nRestart?"
@@ -99,5 +97,6 @@ ApplicationWindow {
 
         title: "New game"
     }
+
     Component.onCompleted: grid.refreshModel();
 }

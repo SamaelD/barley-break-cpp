@@ -42,10 +42,6 @@ Rectangle {
                 return;
             }
             Logic.move(index);
-            if (Logic.checkWin()) {
-                rect.victory();
-                Logic.saveScores();
-            }
         }
     }
 }

@@ -13,13 +13,14 @@ class Logic : public QObject {
   Q_PROPERTY(QStringList list READ list WRITE setList NOTIFY listChanged)
   Q_PROPERTY(int moveCounter READ moveCounter WRITE setmoveCounter NOTIFY moveCounterChanged)
   Q_PROPERTY(int BestScore READ BestScore WRITE setBestScore NOTIFY BestScoreChanged)
+  Q_PROPERTY(bool victory READ victory NOTIFY victoryChanged)
 
   explicit Logic(QObject *parent = nullptr);
 
 public:
   Logic(const Logic &) = delete;
   Logic(Logic &&) = delete;
-  ~Logic() = default;
+  ~Logic();
   int moveCounter() const;
 
   Q_INVOKABLE void refresh();
@@ -30,6 +31,7 @@ public:
   QStringList list() const;
   int countInvertion() const;
   int BestScore() const;
+  bool victory() const;
 
   bool checkOutOfRange(int value);
   bool checkBorder(int value, bool right);
@@ -40,10 +42,13 @@ public:
   static QObject *singletone_provider(QQmlEngine *engine, QJSEngine *scriptEngine);
 
 
+
 signals:
   void moveCounterChanged(int moveCounter);
   void listChanged(QStringList list);
   void BestScoreChanged(int BestScore);
+  void victoryChanged(bool victory);
+
 
 public slots:
   void setmoveCounter(int moveCounter);
@@ -59,6 +64,7 @@ private:
   int m_moveCounter {0};
   static Logic *pInst;
   int m_BestScore;
+  bool m_victory { false };
 
 };
 
