@@ -8,8 +8,6 @@ import Logic_CPP 1.0
 ApplicationWindow {
     id: wnd
 
-    property var score: 0
-
     minimumHeight: 600
     minimumWidth: 400
     visible: true
@@ -65,65 +63,18 @@ ApplicationWindow {
         cellHeight: (parent.height - parent.height * 0.2) / 4
 
         model: Logic.list
-        delegate: component
+        delegate: Delegate {
+            width: grid.cellWidth
+            height: grid.cellHeight
+
+            onVictory: gameOverDialog.visible = true;
+        }
 
         move: Transition {
             NumberAnimation {
                 properties: "x, y"
                 easing.type: Easing.InOutSine
                 duration: 300
-            }
-        }
-    }
-
-    Component {
-        id: component
-        Rectangle {
-            id: rect
-
-            width: grid.cellWidth
-            height: grid.cellHeight
-
-            opacity: Logic.identifier(index) == 0 ? 0 : 1
-            border.color: "black"
-            color: "green"
-            radius: 10
-
-            Text {
-                anchors.centerIn: rect
-
-                text: Logic.identifier(index)
-
-                font.bold: true
-                font.pixelSize: 48
-
-                color: mouse.containsMouse ? "black" : "darkred"
-            }
-
-            transform: Scale {
-                origin.x: rect.x;
-                origin.y: rect.y;
-                xScale: mouse.containsMouse ? 1.015 : 1
-                yScale: mouse.containsMouse ? 1.015 : 1
-            }
-
-            MouseArea {
-                id: mouse
-
-                anchors.fill: rect
-
-                hoverEnabled: true
-                acceptedButtons: Qt.LeftButton
-                onClicked: {
-                    if (Logic.identifier(index) == 0) {
-                        return;
-                    }
-                    Logic.move(index);
-                    if (Logic.checkWin()) {
-                        Logic.saveScores();
-                        gameOverDialog.visible = true;
-                    }
-                }
             }
         }
     }
